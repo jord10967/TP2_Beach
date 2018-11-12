@@ -56,6 +56,7 @@ public class Beach extends Entite {
                 y = y + deltaY;
             }
         }
+         
         if (y < HAUTEUR - 128) {
             if (animation == 0) {
                 this.image = listeAnimation.get(0);

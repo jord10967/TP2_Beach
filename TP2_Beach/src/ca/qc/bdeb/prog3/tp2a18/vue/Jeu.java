@@ -37,6 +37,7 @@ public class Jeu extends BasicGame implements Observer {
     private SpriteSheet spriteMonde, spritePrincesse;
     private Plancher plancher1, plancher2;
     private Beach beach;
+    
 
     /**
      * Contructeur de Jeu
@@ -154,13 +155,28 @@ public class Jeu extends BasicGame implements Observer {
         } else {
             listeKeys.remove(KeyCode.S);
         }
+        if (input.isKeyDown(Input.KEY_SPACE)) {
+            if (!listeKeys.contains(KeyCode.SPACE)) {
+                listeKeys.add(KeyCode.SPACE);
+            }
+        } else {
+            listeKeys.remove(KeyCode.SPACE);
+        }
     }
 
     private void traiterKeys() {
         beach.bouger(listeKeys);
+        if (listeKeys.contains(KeyCode.SPACE)) {
+            tirerBalle(); // Méthode qui va ajouter un projectile tiré à l’écran
+        }
+
     }
 
     private void gererCollisions() {
+    }
+
+    private void tirerBalle() {
+//mettre le ptojectile dans la liste entite et bougeable
     }
 
 }

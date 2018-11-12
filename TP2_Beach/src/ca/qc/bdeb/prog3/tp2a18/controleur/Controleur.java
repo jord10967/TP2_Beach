@@ -7,8 +7,6 @@ package ca.qc.bdeb.prog3.tp2a18.controleur;
 
 import ca.qc.bdeb.prog3.tp2a18.modele.Modele;
 import ca.qc.bdeb.prog3.tp2a18.vue.Jeu;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.SlickException;
 
@@ -18,13 +16,15 @@ import org.newdawn.slick.SlickException;
  */
 public class Controleur {
     private Modele modele = new Modele();
+    public static final int HAUTEUR = 900;
+    public static final int LARGEUR = 1200;
 
     public Controleur(){
 
         try {
             AppGameContainer app;
             app = new AppGameContainer(new Jeu("Jeu", this, modele));
-            app.setDisplayMode(1200, 900, false);
+            app.setDisplayMode(LARGEUR, HAUTEUR, false);
             app.setShowFPS(false);
             app.setVSync(false);
             app.start();

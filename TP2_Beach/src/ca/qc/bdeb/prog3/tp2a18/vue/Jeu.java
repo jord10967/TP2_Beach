@@ -34,8 +34,9 @@ public class Jeu extends BasicGame implements Observer {
     private ArrayList<KeyCode> listeKeys = new ArrayList<>(); // Les touches enfoncées
     private Input input; // L’entrée (souris/touches de clavier, etc.)
     private Ciel ciel;
-    private SpriteSheet spriteMonde;
+    private SpriteSheet spriteMonde, spritePrincesse;
     private Plancher plancher1, plancher2;
+    private Beach beach;
 
     /**
      * Contructeur de Jeu
@@ -59,7 +60,10 @@ public class Jeu extends BasicGame implements Observer {
      * @throws SlickException si le jeu plante
      */
     public void init(GameContainer container) throws SlickException {
+        input = container.getInput();
         spriteMonde = new SpriteSheet("images/sprites_monde.png", 32, 32);
+        spritePrincesse = new SpriteSheet("images/sprites_princess.png", 32, 64);
+
         for (int i = 0; i <= HAUTEUR - 64; i = i + 32) {
             for (int j = 0; j <= LARGEUR; j = j + 32) {
                 ciel = new Ciel(j, i, spriteMonde);
@@ -76,6 +80,8 @@ public class Jeu extends BasicGame implements Observer {
             listeEntite.add(plancher2);
 
         }
+        beach = new Beach(10, HAUTEUR - 128, spritePrincesse);
+        listeEntite.add(beach);
 
     }
 
@@ -87,7 +93,9 @@ public class Jeu extends BasicGame implements Observer {
      * @throws SlickException Si le update plante
      */
     public void update(GameContainer container, int delta) throws SlickException {
-
+        gererCollisions();
+        getKeys();
+        traiterKeys();
     }
 
     /**
@@ -112,6 +120,47 @@ public class Jeu extends BasicGame implements Observer {
     @Override
     public void update(Observable o, Object arg) {
 
+    }
+
+    private void getKeys() {
+        if (input.isKeyDown(Input.KEY_A)) {
+            if (!listeKeys.contains(KeyCode.A)) {
+                listeKeys.add(KeyCode.A);
+            }
+        } else {
+            listeKeys.remove(KeyCode.A);
+        }
+
+        if (input.isKeyDown(Input.KEY_D)) {
+            if (!listeKeys.contains(KeyCode.D)) {
+                listeKeys.add(KeyCode.D);
+            }
+        } else {
+            listeKeys.remove(KeyCode.D);
+        }
+
+        if (input.isKeyDown(Input.KEY_W)) {
+            if (!listeKeys.contains(KeyCode.W)) {
+                listeKeys.add(KeyCode.W);
+            }
+        } else {
+            listeKeys.remove(KeyCode.W);
+        }
+
+        if (input.isKeyDown(Input.KEY_S)) {
+            if (!listeKeys.contains(KeyCode.S)) {
+                listeKeys.add(KeyCode.S);
+            }
+        } else {
+            listeKeys.remove(KeyCode.S);
+        }
+    }
+
+    private void traiterKeys() {
+        beach.bouger(listeKeys);
+    }
+
+    private void gererCollisions() {
     }
 
 }

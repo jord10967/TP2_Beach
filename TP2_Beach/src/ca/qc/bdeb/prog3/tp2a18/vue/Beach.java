@@ -21,7 +21,7 @@ public class Beach extends Entite {
     private int deltaX = 1;
     private int deltaY = 1;
     private ArrayList<Image> listeAnimation = new ArrayList();
-    private int animation = 0;
+    private int animation1 = 0, animation2 = 0;
 
     public Beach(float x, float y, SpriteSheet spriteSheet) {
         super(x, y, spriteSheet, 0, 3);
@@ -56,30 +56,54 @@ public class Beach extends Entite {
                 y = y + deltaY;
             }
         }
-         
+
         if (y < HAUTEUR - 128) {
-            if (animation == 0) {
+
+            if (animation2 < 400) {
+                y = y - 0.05f;
+            } else if (animation2 < 800) {
+                y = y + 0.05f;
+            } else if (animation2 == 800) {
+                animation2 = -1;
+            }
+
+            if (animation1 == 0) {
                 this.image = listeAnimation.get(0);
-            } else if (animation == 50) {
+
+            } else if (animation1 == 50) {
                 this.image = listeAnimation.get(1);
-            } else if (animation == 100) {
+
+            } else if (animation1 == 100) {
                 this.image = listeAnimation.get(2);
-            } else if (animation == 150) {
-                animation = -1;
+
+            } else if (animation1 == 150) {
+
+                animation1 = -1;
             }
-            animation++;
+            animation1++;
+            animation2++;
         } else {
-            if (animation == 0) {
+            if (animation1 == 0) {
                 this.image = listeAnimation.get(3);
-            } else if (animation == 50) {
+            } else if (animation1 == 50) {
                 this.image = listeAnimation.get(4);
-            } else if (animation == 100) {
+            } else if (animation1 == 100) {
                 this.image = listeAnimation.get(5);
-            } else if (animation == 150) {
-                animation = -1;
+            } else if (animation1 == 150) {
+                animation1 = -1;
             }
-            animation++;
+            animation1++;
         }
+    }
+
+    @Override
+    public float getX() {
+        return super.getX(); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public float getY() {
+        return super.getY(); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

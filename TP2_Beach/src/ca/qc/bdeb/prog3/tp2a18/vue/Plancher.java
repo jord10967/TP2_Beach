@@ -14,6 +14,8 @@ import org.newdawn.slick.SpriteSheet;
  */
 public class Plancher extends Entite implements Bougeable {
 
+    private float deltaX = 0.5f;
+
     public Plancher() {
         super(0, 0, 0, 0, null);
     }
@@ -24,9 +26,9 @@ public class Plancher extends Entite implements Bougeable {
 
     @Override
     public void bouger() {
-        x =  x - 0.5f;
-        if(x==-32){
-            x=LARGEUR+16;
+        x = x - deltaX;
+        if (x == -32) {
+            x = LARGEUR + 16;
         }
     }
 

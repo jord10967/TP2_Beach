@@ -41,6 +41,10 @@ public class Jeu extends BasicGame implements Observer {
     private FeuilleArbre feuilleArbre;
     private TroncArbre troncArbre;
     private Random r;
+    private Projectile balle;
+    private String points1 = "0";
+    private int points2;
+    private Coeur coeur;
 
     /**
      * Contructeur de Jeu
@@ -64,6 +68,7 @@ public class Jeu extends BasicGame implements Observer {
      * @throws SlickException si le jeu plante
      */
     public void init(GameContainer container) throws SlickException {
+        points2 = Integer.parseInt(points1);
         input = container.getInput();
         r = new Random();
         spriteMonde = new SpriteSheet("images/sprites_monde.png", 32, 32);
@@ -77,7 +82,8 @@ public class Jeu extends BasicGame implements Observer {
 
         }
         for (int i = 0; i < 2; i++) {
-            creerArbre(0, LARGEUR);
+            creerArbre(0);
+
         }
         for (int i = 0; i < LARGEUR + 32; i = i + 32) {
 
@@ -92,6 +98,10 @@ public class Jeu extends BasicGame implements Observer {
 
         beach = new Beach(10, HAUTEUR - 128, spritePrincesse);
         listeEntite.add(beach);
+        for (int i = 1; i < 4; i++) {
+            coeur = new Coeur(i * 32, i);
+            listeEntite.add(coeur);
+        }
 
     }
 
@@ -103,10 +113,8 @@ public class Jeu extends BasicGame implements Observer {
      * @throws SlickException Si le update plante
      */
     public void update(GameContainer container, int delta) throws SlickException {
-        int arbreRan = r.nextInt(850);
-        if (arbreRan == 123) {
-            creerArbre(LARGEUR, LARGEUR * 2);
-        }
+
+        gestionArbres();
         delete();
         gererCollisions();
         getKeys();
@@ -124,6 +132,7 @@ public class Jeu extends BasicGame implements Observer {
         for (Entite entite : listeEntite) {
             g.drawImage(entite.getImage(), entite.getX(), entite.getY());
         }
+        g.drawString(points1, LARGEUR - 30, 10);
     }
 
     /**
@@ -180,8 +189,11 @@ public class Jeu extends BasicGame implements Observer {
 
     private void traiterKeys() {
         beach.bouger(listeKeys);
-        if (listeKeys.contains(KeyCode.SPACE)) {
-            tirerBalle(); // Méthode qui va ajouter un projectile tiré à l’écran
+
+        long millis = System.currentTimeMillis() % 500;
+        if (listeKeys.contains(KeyCode.SPACE) && millis > 0 && millis < 10) {
+            tirerBalle();
+
         }
 
     }
@@ -190,14 +202,17 @@ public class Jeu extends BasicGame implements Observer {
     }
 
     private void tirerBalle() {
-//mettre le ptojectile dans la liste entite et bougeable
+        balle = new Projectile(beach.getX() + 32, beach.getY() + 24);
+        listeEntite.add(balle);
+        listeBougeable.add(balle);
+
     }
 
-    public void creerArbre(int min, int max) {
-        int position = r.nextInt(max);
+    public void creerArbre(int intervale) {
+        int position = r.nextInt(2 * LARGEUR);
         int nombreHauteur = r.nextInt(13);
-        while (position <= max - min) {
-            position = r.nextInt(max);
+        while (position <= intervale) {
+            position = r.nextInt(2 * LARGEUR);
 
         }
         while (nombreHauteur < 2) {
@@ -228,6 +243,13 @@ public class Jeu extends BasicGame implements Observer {
         listeBougeable.removeAll(listeTemp);
         listeEntite.removeAll(listeTemp);
         listeTemp.clear();
+    }
+
+    private void gestionArbres() {
+        int arbreRan = r.nextInt(850);
+        if (arbreRan == 123) {
+            creerArbre(LARGEUR);
+        }
     }
 
 }

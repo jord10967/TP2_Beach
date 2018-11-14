@@ -9,17 +9,17 @@ package ca.qc.bdeb.prog3.tp2a18.vue;
  *
  * @author 1721244
  */
-public class Projectile extends Entite implements Bougeable {
+public class Coeur extends Entite {
 
-    private int deltaX = 2;
+    private int quelCoeur;
 
-    public Projectile(float x, float y) {
-        super(x, y, 16, 16, "images/boulet.png");
+    public Coeur(float x, int quelCoeur) {
+        super(x, 10, 28, 28, "images/coeur.png");
+        this.quelCoeur = quelCoeur;
     }
 
-    @Override
-    public void bouger() {
-        x = x + deltaX;
+    public int getQuelCoeur() {
+        return quelCoeur;
     }
 
 }

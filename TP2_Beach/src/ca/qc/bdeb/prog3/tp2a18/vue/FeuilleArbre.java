@@ -13,6 +13,8 @@ import org.newdawn.slick.SpriteSheet;
  */
 public class FeuilleArbre extends Entite implements Bougeable {
 
+    private float deltaX = 0.5f;
+
     public FeuilleArbre(float x, float y, SpriteSheet spriteSheet) {
         super(x, y, spriteSheet, 1, 5);
 
@@ -20,7 +22,7 @@ public class FeuilleArbre extends Entite implements Bougeable {
 
     @Override
     public void bouger() {
-        x = x - 0.5f;
-       
+        x = x - deltaX;
+
     }
 }

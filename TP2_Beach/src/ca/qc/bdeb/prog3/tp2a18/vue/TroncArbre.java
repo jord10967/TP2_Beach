@@ -13,13 +13,15 @@ import org.newdawn.slick.SpriteSheet;
  */
 public class TroncArbre extends Entite implements Bougeable {
 
+    private float deltaX = 0.5f;
+
     public TroncArbre(float x, float y, SpriteSheet spriteSheet) {
         super(x, y, spriteSheet, 2, 5);
     }
 
     @Override
     public void bouger() {
-        x = x - 0.5f;
+        x = x - deltaX;
 
     }
 

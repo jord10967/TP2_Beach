@@ -5,21 +5,21 @@
  */
 package ca.qc.bdeb.prog3.tp2a18.vue;
 
+import org.newdawn.slick.SpriteSheet;
+
 /**
  *
  * @author 1721244
  */
-public class Projectile extends Entite implements Bougeable {
-
-    private int deltaX = 2;
-
-    public Projectile(float x, float y) {
-        super(x, y, 16, 16, "images/boulet.png");
+public abstract class Enemi extends Entite implements Bougeable{
+    private int deltaX = 1;
+    public Enemi(float x, float y, SpriteSheet spriteSheet, int ligne, int colonne) {
+        super(x, y, spriteSheet, ligne, colonne);
     }
 
     @Override
     public void bouger() {
-        x = x + deltaX;
+        x = x - deltaX;
     }
-
+    
 }

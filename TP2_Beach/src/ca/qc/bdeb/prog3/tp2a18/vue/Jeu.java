@@ -76,6 +76,9 @@ public class Jeu extends BasicGame implements Observer {
             }
 
         }
+        for (int i = 0; i < 2; i++) {
+            creerArbre(0, LARGEUR);
+        }
         for (int i = 0; i < LARGEUR + 32; i = i + 32) {
 
             plancher1 = new Plancher(i, HAUTEUR - 64, spriteMonde, 3, 1);
@@ -100,13 +103,11 @@ public class Jeu extends BasicGame implements Observer {
      * @throws SlickException Si le update plante
      */
     public void update(GameContainer container, int delta) throws SlickException {
-        int arbreRan = r.nextInt(500);
-        if (arbreRan == 11) {
-            creerArbre();
+        int arbreRan = r.nextInt(850);
+        if (arbreRan == 123) {
+            creerArbre(LARGEUR, LARGEUR * 2);
         }
-        for (Bougeable b : listeBougeable) {
-            b.bouger();
-        }
+        delete();
         gererCollisions();
         getKeys();
         traiterKeys();
@@ -192,26 +193,41 @@ public class Jeu extends BasicGame implements Observer {
 //mettre le ptojectile dans la liste entite et bougeable
     }
 
-    public void creerArbre() {
-        int position = r.nextInt(2 * LARGEUR);
-        int hauteur = r.nextInt(HAUTEUR / 2);
-        while (position <= LARGEUR) {
-            position = r.nextInt(2 * LARGEUR);
+    public void creerArbre(int min, int max) {
+        int position = r.nextInt(max);
+        int nombreHauteur = r.nextInt(13);
+        while (position <= max - min) {
+            position = r.nextInt(max);
 
         }
-        while (hauteur < 64 && hauteur % 32 != 0) {
-            hauteur = r.nextInt(HAUTEUR / 2);
+        while (nombreHauteur < 2) {
+            nombreHauteur = r.nextInt(13);
         }
-       
-        for (float i = HAUTEUR-96; i < HAUTEUR - hauteur; i = i - 32) {
+        feuilleArbre = new FeuilleArbre(position, HAUTEUR - 64 - 32 * nombreHauteur, spriteMonde);
+        for (float i = HAUTEUR - 32 - 32 * nombreHauteur; i < HAUTEUR - 64; i = i + 32) {
             troncArbre = new TroncArbre(position, i, spriteMonde);
             listeEntite.add(troncArbre);
             listeBougeable.add(troncArbre);
-        } 
-        feuilleArbre = new FeuilleArbre(position, HAUTEUR - hauteur-32 , spriteMonde);
+        }
+
         listeEntite.add(feuilleArbre);
         listeBougeable.add(feuilleArbre);
 
+    }
+
+    private void delete() {
+        ArrayList<Entite> listeTemp = new ArrayList();
+
+        for (int i = 0; i < listeBougeable.size(); i++) {
+            listeBougeable.get(i).bouger();
+            if (listeBougeable.get(i).getRectangle().getX() < -32 && listeBougeable.get(i).getClass() != Plancher.class) {
+                listeTemp.add((Entite) listeBougeable.get(i));
+            }
+
+        }
+        listeBougeable.removeAll(listeTemp);
+        listeEntite.removeAll(listeTemp);
+        listeTemp.clear();
     }
 
 }

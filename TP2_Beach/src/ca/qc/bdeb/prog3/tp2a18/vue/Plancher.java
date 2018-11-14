@@ -5,18 +5,29 @@
  */
 package ca.qc.bdeb.prog3.tp2a18.vue;
 
+import static ca.qc.bdeb.prog3.tp2a18.controleur.Controleur.LARGEUR;
 import org.newdawn.slick.SpriteSheet;
 
 /**
  *
  * @author 1721244
  */
-public class Plancher extends Entite {
-    
+public class Plancher extends Entite implements Bougeable {
+
+    public Plancher() {
+        super(0, 0, 0, 0, null);
+    }
+
     public Plancher(float x, float y, SpriteSheet spriteSheet, int ligne, int colonne) {
         super(x, y, spriteSheet, ligne, colonne);
     }
-    
-   
-    
+
+    @Override
+    public void bouger() {
+        x =  x - 0.5f;
+        if(x==-32){
+            x=LARGEUR+16;
+        }
+    }
+
 }

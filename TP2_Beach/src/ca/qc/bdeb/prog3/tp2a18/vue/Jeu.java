@@ -12,6 +12,7 @@ import ca.qc.bdeb.prog3.tp2a18.modele.Modele;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Random;
 import javafx.scene.input.KeyCode;
 import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.GameContainer;
@@ -37,7 +38,9 @@ public class Jeu extends BasicGame implements Observer {
     private SpriteSheet spriteMonde, spritePrincesse;
     private Plancher plancher1, plancher2;
     private Beach beach;
-    
+    private FeuilleArbre feuilleArbre;
+    private TroncArbre troncArbre;
+    private Random r;
 
     /**
      * Contructeur de Jeu
@@ -62,6 +65,7 @@ public class Jeu extends BasicGame implements Observer {
      */
     public void init(GameContainer container) throws SlickException {
         input = container.getInput();
+        r = new Random();
         spriteMonde = new SpriteSheet("images/sprites_monde.png", 32, 32);
         spritePrincesse = new SpriteSheet("images/sprites_princess.png", 32, 64);
 
@@ -72,15 +76,17 @@ public class Jeu extends BasicGame implements Observer {
             }
 
         }
-        for (int i = 0; i < LARGEUR; i = i + 32) {
+        for (int i = 0; i < LARGEUR + 32; i = i + 32) {
 
             plancher1 = new Plancher(i, HAUTEUR - 64, spriteMonde, 3, 1);
             plancher2 = new Plancher(i, HAUTEUR - 32, spriteMonde, 4, 1);
 
             listeEntite.add(plancher1);
             listeEntite.add(plancher2);
-
+            listeBougeable.add(plancher1);
+            listeBougeable.add(plancher2);
         }
+
         beach = new Beach(10, HAUTEUR - 128, spritePrincesse);
         listeEntite.add(beach);
 
@@ -94,6 +100,13 @@ public class Jeu extends BasicGame implements Observer {
      * @throws SlickException Si le update plante
      */
     public void update(GameContainer container, int delta) throws SlickException {
+        int arbreRan = r.nextInt(500);
+        if (arbreRan == 11) {
+            creerArbre();
+        }
+        for (Bougeable b : listeBougeable) {
+            b.bouger();
+        }
         gererCollisions();
         getKeys();
         traiterKeys();
@@ -177,6 +190,28 @@ public class Jeu extends BasicGame implements Observer {
 
     private void tirerBalle() {
 //mettre le ptojectile dans la liste entite et bougeable
+    }
+
+    public void creerArbre() {
+        int position = r.nextInt(2 * LARGEUR);
+        int hauteur = r.nextInt(HAUTEUR / 2);
+        while (position <= LARGEUR) {
+            position = r.nextInt(2 * LARGEUR);
+
+        }
+        while (hauteur < 64 && hauteur % 32 != 0) {
+            hauteur = r.nextInt(HAUTEUR / 2);
+        }
+       
+        for (float i = HAUTEUR-96; i < HAUTEUR - hauteur; i = i - 32) {
+            troncArbre = new TroncArbre(position, i, spriteMonde);
+            listeEntite.add(troncArbre);
+            listeBougeable.add(troncArbre);
+        } 
+        feuilleArbre = new FeuilleArbre(position, HAUTEUR - hauteur-32 , spriteMonde);
+        listeEntite.add(feuilleArbre);
+        listeBougeable.add(feuilleArbre);
+
     }
 
 }

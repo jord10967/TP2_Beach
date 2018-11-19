@@ -35,7 +35,7 @@ public class Jeu extends BasicGame implements Observer {
     private ArrayList<KeyCode> listeKeys = new ArrayList<>(); // Les touches enfoncées
     private Input input; // L’entrée (souris/touches de clavier, etc.)
     private Ciel ciel;
-    private SpriteSheet spriteMonde, spritePrincesse;
+    private SpriteSheet spriteMonde, spritePrincesse, spriteDivers;
     private Plancher plancher1, plancher2;
     private Beach beach;
     private FeuilleArbre feuilleArbre;
@@ -45,6 +45,11 @@ public class Jeu extends BasicGame implements Observer {
     private String points1 = "0";
     private int points2;
     private Coeur coeur;
+    private EnnemiTerre enemiTerre;
+    private BouleDeFeu bouleDeFeu;
+    private EnnemiVolant1 ennemiVolant1;
+    private int intervalleVagues;
+    private int spawn;
 
     /**
      * Contructeur de Jeu
@@ -68,33 +73,16 @@ public class Jeu extends BasicGame implements Observer {
      * @throws SlickException si le jeu plante
      */
     public void init(GameContainer container) throws SlickException {
+        intervalleVagues = 0;
+        spawn = 0;
         points2 = Integer.parseInt(points1);
         input = container.getInput();
         r = new Random();
         spriteMonde = new SpriteSheet("images/sprites_monde.png", 32, 32);
         spritePrincesse = new SpriteSheet("images/sprites_princess.png", 32, 64);
+        spriteDivers = new SpriteSheet("images/sprites_divers.png", 32, 32);
 
-        for (int i = 0; i <= HAUTEUR - 64; i = i + 32) {
-            for (int j = 0; j <= LARGEUR; j = j + 32) {
-                ciel = new Ciel(j, i, spriteMonde);
-                listeEntite.add(ciel);
-            }
-
-        }
-        for (int i = 0; i < 2; i++) {
-            creerArbre(0);
-
-        }
-        for (int i = 0; i < LARGEUR + 32; i = i + 32) {
-
-            plancher1 = new Plancher(i, HAUTEUR - 64, spriteMonde, 3, 1);
-            plancher2 = new Plancher(i, HAUTEUR - 32, spriteMonde, 4, 1);
-
-            listeEntite.add(plancher1);
-            listeEntite.add(plancher2);
-            listeBougeable.add(plancher1);
-            listeBougeable.add(plancher2);
-        }
+        background();
 
         beach = new Beach(10, HAUTEUR - 128, spritePrincesse);
         listeEntite.add(beach);
@@ -114,11 +102,15 @@ public class Jeu extends BasicGame implements Observer {
      */
     public void update(GameContainer container, int delta) throws SlickException {
 
+        bouger();
+        creerBouleDeFeu();
+        gestionEnemi();
         gestionArbres();
         delete();
         gererCollisions();
         getKeys();
         traiterKeys();
+        intervalleVagues++;
     }
 
     /**
@@ -195,10 +187,10 @@ public class Jeu extends BasicGame implements Observer {
             tirerBalle();
 
         }
-
     }
 
     private void gererCollisions() {
+
     }
 
     private void tirerBalle() {
@@ -234,7 +226,7 @@ public class Jeu extends BasicGame implements Observer {
         ArrayList<Entite> listeTemp = new ArrayList();
 
         for (int i = 0; i < listeBougeable.size(); i++) {
-            listeBougeable.get(i).bouger();
+
             if (listeBougeable.get(i).getRectangle().getX() < -32 && listeBougeable.get(i).getClass() != Plancher.class) {
                 listeTemp.add((Entite) listeBougeable.get(i));
             }
@@ -250,6 +242,93 @@ public class Jeu extends BasicGame implements Observer {
         if (arbreRan == 123) {
             creerArbre(LARGEUR);
         }
+    }
+
+    private void background() {
+        for (int i = 0; i <= HAUTEUR - 64; i = i + 32) {
+            for (int j = 0; j <= LARGEUR; j = j + 32) {
+                ciel = new Ciel(j, i, spriteMonde);
+                listeEntite.add(ciel);
+            }
+
+        }
+        for (int i = 0; i < 2; i++) {
+            creerArbre(0);
+
+        }
+        for (int i = 0; i < LARGEUR + 32; i = i + 32) {
+
+            plancher1 = new Plancher(i, HAUTEUR - 64, spriteMonde, 3, 1);
+            plancher2 = new Plancher(i, HAUTEUR - 32, spriteMonde, 4, 1);
+
+            listeEntite.add(plancher1);
+            listeEntite.add(plancher2);
+            listeBougeable.add(plancher1);
+            listeBougeable.add(plancher2);
+        }
+    }
+
+    private void gestionEnemi() {
+        int typeVague = r.nextInt(1);
+        int ennemiRan = r.nextInt(1000);
+        if (ennemiRan == 123) {
+            creerEnemiTerre(LARGEUR);
+        }
+        if (intervalleVagues % 4000 == 0) {
+
+            vaguesEnnemi(typeVague);
+        }
+
+    }
+
+    private void creerEnemiTerre(int intervale) {
+        int position = r.nextInt(2 * LARGEUR);
+
+        while (position <= intervale) {
+            position = r.nextInt(2 * LARGEUR);
+
+        }
+        enemiTerre = new EnnemiTerre(position, HAUTEUR - 96, spriteDivers);
+
+        listeEntite.add(enemiTerre);
+        listeBougeable.add(enemiTerre);
+    }
+
+    private void bouger() {
+        for (int i = 0; i < listeBougeable.size(); i++) {
+            listeBougeable.get(i).bouger();
+        }
+    }
+
+    private void creerBouleDeFeu() {
+        for (int i = 0; i < listeBougeable.size(); i++) {
+            if (listeBougeable.get(i) instanceof EnnemiTerre) {
+                EnnemiTerre ennemi = (EnnemiTerre) listeBougeable.get(i);
+                if (ennemi.getAnimation() == 800) {
+                    bouleDeFeu = new BouleDeFeu(ennemi.getX(), ennemi.getY() - 32, spriteDivers);
+                    listeBougeable.add(bouleDeFeu);
+                    listeEntite.add(bouleDeFeu);
+                }
+            }
+        }
+    }
+
+    private void vaguesEnnemi(int typeVague) {
+
+        switch (typeVague) {
+            case 0:
+                ennemiVolant1 = new EnnemiVolant1(LARGEUR, HAUTEUR - 850, spriteDivers);
+                listeBougeable.add(ennemiVolant1);
+                listeEntite.add(ennemiVolant1);
+
+                break;
+            case 1:
+
+                break;
+            case 2:
+                break;
+        }
+
     }
 
 }

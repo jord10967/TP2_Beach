@@ -9,7 +9,7 @@ package ca.qc.bdeb.prog3.tp2a18.vue;
  *
  * @author 1721244
  */
-public class Projectile extends Entite implements Bougeable {
+public class Projectile extends Entite implements Bougeable, Collisionnable{
 
     private int deltaX = 2;
 

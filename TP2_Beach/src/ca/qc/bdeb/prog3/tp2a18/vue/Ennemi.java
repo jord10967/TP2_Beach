@@ -11,15 +11,16 @@ import org.newdawn.slick.SpriteSheet;
  *
  * @author 1721244
  */
-public abstract class Enemi extends Entite implements Bougeable{
-    private int deltaX = 1;
-    public Enemi(float x, float y, SpriteSheet spriteSheet, int ligne, int colonne) {
+public abstract class Ennemi extends Entite implements Bougeable {
+
+    protected int deltaX = 1;
+
+    public Ennemi(float x, float y, SpriteSheet spriteSheet, int ligne, int colonne) {
         super(x, y, spriteSheet, ligne, colonne);
+        this.deltaX = deltaX;
     }
 
     @Override
-    public void bouger() {
-        x = x - deltaX;
-    }
-    
+    public abstract void bouger();
+
 }

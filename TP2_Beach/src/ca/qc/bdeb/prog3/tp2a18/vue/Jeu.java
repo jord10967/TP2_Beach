@@ -48,8 +48,11 @@ public class Jeu extends BasicGame implements Observer {
     private EnnemiTerre enemiTerre;
     private BouleDeFeu bouleDeFeu;
     private EnnemiVolant1 ennemiVolant1;
-    private int intervalleVagues;
-    private int spawn;
+    private int typeVague;
+    private long millis;
+    private long millis2;
+    private EnnemiVolant3 ennemiVolant3;
+    private EnnemiVolant2 ennemiVolant2;
 
     /**
      * Contructeur de Jeu
@@ -73,8 +76,8 @@ public class Jeu extends BasicGame implements Observer {
      * @throws SlickException si le jeu plante
      */
     public void init(GameContainer container) throws SlickException {
-        intervalleVagues = 0;
-        spawn = 0;
+        millis = System.currentTimeMillis();
+        millis2 = System.currentTimeMillis();;
         points2 = Integer.parseInt(points1);
         input = container.getInput();
         r = new Random();
@@ -101,16 +104,28 @@ public class Jeu extends BasicGame implements Observer {
      * @throws SlickException Si le update plante
      */
     public void update(GameContainer container, int delta) throws SlickException {
-
+        typeVague = r.nextInt(3);
         bouger();
         creerBouleDeFeu();
-        gestionEnemi();
+        gestionEnnemiTerre();
+
+        if (System.currentTimeMillis() >= millis + 4000) {
+            millis = System.currentTimeMillis();
+            int cpt = 0;
+            for (int i = 0; i < 4; i++) {
+                System.out.println("a");
+                vaguesEnnemi(typeVague, cpt);
+                cpt++;
+            }
+
+        }
+
         gestionArbres();
         delete();
         gererCollisions();
         getKeys();
         traiterKeys();
-        intervalleVagues++;
+
     }
 
     /**
@@ -182,10 +197,9 @@ public class Jeu extends BasicGame implements Observer {
     private void traiterKeys() {
         beach.bouger(listeKeys);
 
-        long millis = System.currentTimeMillis() % 500;
-        if (listeKeys.contains(KeyCode.SPACE) && millis > 0 && millis < 10) {
+        if (listeKeys.contains(KeyCode.SPACE) && System.currentTimeMillis() >= millis2 + 500) {
             tirerBalle();
-
+            millis2 = System.currentTimeMillis();
         }
     }
 
@@ -268,19 +282,6 @@ public class Jeu extends BasicGame implements Observer {
         }
     }
 
-    private void gestionEnemi() {
-        int typeVague = r.nextInt(1);
-        int ennemiRan = r.nextInt(1000);
-        if (ennemiRan == 123) {
-            creerEnemiTerre(LARGEUR);
-        }
-        if (intervalleVagues % 4000 == 0) {
-
-            vaguesEnnemi(typeVague);
-        }
-
-    }
-
     private void creerEnemiTerre(int intervale) {
         int position = r.nextInt(2 * LARGEUR);
 
@@ -313,22 +314,62 @@ public class Jeu extends BasicGame implements Observer {
         }
     }
 
-    private void vaguesEnnemi(int typeVague) {
+    private void vaguesEnnemi(int typeVague, int cpt) {
+        int intervalle = LARGEUR;
+        
 
         switch (typeVague) {
+
             case 0:
-                ennemiVolant1 = new EnnemiVolant1(LARGEUR, HAUTEUR - 850, spriteDivers);
+                if (cpt == 1) {
+                    intervalle += 40;
+                } else if (cpt == 2) {
+                    intervalle += 80;
+
+                } else if (cpt == 3) {
+                    intervalle += 120;
+                }
+                ennemiVolant1 = new EnnemiVolant1(intervalle, HAUTEUR - 850, spriteDivers);
                 listeBougeable.add(ennemiVolant1);
                 listeEntite.add(ennemiVolant1);
 
                 break;
             case 1:
+                if (cpt == 1) {
+                    intervalle += 20;
+                } else if (cpt == 2) {
+                    intervalle += 40;
+
+                } else if (cpt == 3) {
+                    intervalle += 60;
+                }
+                ennemiVolant2 = new EnnemiVolant2(intervalle, HAUTEUR - 850, spriteDivers);
+                listeBougeable.add(ennemiVolant2);
+                listeEntite.add(ennemiVolant2);
 
                 break;
             case 2:
+                if (cpt == 1) {
+                    intervalle += 0;
+                } else if (cpt == 2) {
+                    intervalle += 80;
+
+                } else if (cpt == 3) {
+                    intervalle += 120;
+                }
+                ennemiVolant3 = new EnnemiVolant3(intervalle, HAUTEUR - 850, spriteDivers);
+                listeBougeable.add(ennemiVolant3);
+                listeEntite.add(ennemiVolant3);
                 break;
         }
 
+    }
+
+    private void gestionEnnemiTerre() {
+        int ennemiRan = r.nextInt(1000);
+        if (ennemiRan == 123) {
+            creerEnemiTerre(LARGEUR);
+        }
     }
 
 }

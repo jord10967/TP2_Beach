@@ -15,7 +15,7 @@ import org.newdawn.slick.SpriteSheet;
  *
  * @author 1721244
  */
-public class EnnemiVolant1 extends Ennemi {
+public class EnnemiVolant1 extends Ennemi  {
 
     private int animation1;
     private float deltaY = 0.5f;

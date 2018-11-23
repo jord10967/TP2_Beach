@@ -11,7 +11,7 @@ import org.newdawn.slick.SpriteSheet;
  *
  * @author 1721244
  */
-public abstract class Ennemi extends Entite implements Bougeable {
+public abstract class Ennemi extends Entite implements Bougeable,  Collisionnable {
 
     protected int deltaX = 1;
 

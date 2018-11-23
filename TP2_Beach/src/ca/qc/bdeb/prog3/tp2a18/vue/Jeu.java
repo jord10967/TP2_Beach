@@ -51,6 +51,7 @@ public class Jeu extends BasicGame implements Observer {
     private int typeVague;
     private long millis;
     private long millis2;
+    private long millis3;
     private EnnemiVolant3 ennemiVolant3;
     private EnnemiVolant2 ennemiVolant2;
 
@@ -77,7 +78,8 @@ public class Jeu extends BasicGame implements Observer {
      */
     public void init(GameContainer container) throws SlickException {
         millis = System.currentTimeMillis();
-        millis2 = System.currentTimeMillis();;
+        millis2 = System.currentTimeMillis();
+        millis3 = System.currentTimeMillis();
         points2 = Integer.parseInt(points1);
         input = container.getInput();
         r = new Random();
@@ -198,20 +200,73 @@ public class Jeu extends BasicGame implements Observer {
         beach.bouger(listeKeys);
 
         if (listeKeys.contains(KeyCode.SPACE) && System.currentTimeMillis() >= millis2 + 500) {
-            tirerBalle();
+
+            if (beach.isPossedeArme() ) {
+                tirerAvecArme();
+                
+            } else {
+                tirerBalle();
+            }
+
             millis2 = System.currentTimeMillis();
         }
     }
 
     private void gererCollisions() {
+//        ArrayList<Bougeable> listeTempBougeable = new ArrayList<>();
+//
+//        for (Bougeable b1 : listeBougeable) {
+//            for (Bougeable b2 : listeBougeable) {
+//                if (b1 != b2) {
+//                    if (b1 instanceof Collisionnable && b2 instanceof Collisionnable) {
+//
+//                        if (b1.getRectangle().intersects(b2.getRectangle())) {
+//
+//                            if ((b1.getClass() = Projectile.class && b2.getClass() = BouleDeFeu.class) || (b1.getClass() = Beach.class && b2.getClass() = BouleDeFeu.class) || (b1.getClass() = Beach.class && b2.getClass() = Ennemi.class)) {
+//
+//                                listeTempBougeable.add(b1);
+//                                listeTempBougeable.add(b2);
+//
+//                            }
+//
+//                        }
+//
+//                    }
+//
+//                }
+//
+//            }
+//        }
+//        listeBougeable.removeAll(listeTempBougeable);
+//        listeTempBougeable.clear();
 
     }
 
     private void tirerBalle() {
-        balle = new Projectile(beach.getX() + 32, beach.getY() + 24);
+        balle = new Projectile(beach.getX() + 32, beach.getY() + 24, 0);
         listeEntite.add(balle);
         listeBougeable.add(balle);
 
+    }
+
+    private void tirerAvecArme() {
+        for (int i = 0; i < 3; i++) {
+            switch (i) {
+                case 0:
+                    balle = new Projectile(beach.getX() + 32, beach.getY() + +24, 0);
+                    break;
+                case 1:
+                    balle = new Projectile(beach.getX() + 32, beach.getY(), -0.5f);
+                    break;
+                case 2:
+                    balle = new Projectile(beach.getX() + 32, beach.getY() + 44, 0.5f);
+                    break;
+                default:
+                    break;
+            }
+            listeEntite.add(balle);
+            listeBougeable.add(balle);
+        }
     }
 
     public void creerArbre(int intervale) {
@@ -316,7 +371,6 @@ public class Jeu extends BasicGame implements Observer {
 
     private void vaguesEnnemi(int typeVague, int cpt) {
         int intervalle = LARGEUR;
-        
 
         switch (typeVague) {
 
@@ -370,6 +424,10 @@ public class Jeu extends BasicGame implements Observer {
         if (ennemiRan == 123) {
             creerEnemiTerre(LARGEUR);
         }
+    }
+
+    public Beach getBeach() {
+        return beach;
     }
 
 }

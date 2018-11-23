@@ -14,7 +14,7 @@ import org.newdawn.slick.SpriteSheet;
  *
  * @author 1721244
  */
-public class EnnemiTerre extends Ennemi {
+public class EnnemiTerre extends Ennemi implements  Collisionnable {
 
     private int animation1;
     private Random r = new Random();

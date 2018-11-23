@@ -14,7 +14,7 @@ import org.newdawn.slick.SpriteSheet;
  *
  * @author 1721244
  */
-public class EnnemiVolant3 extends Ennemi {
+public class EnnemiVolant3 extends Ennemi  {
 
     private int animation1;
     private double angle = 0;

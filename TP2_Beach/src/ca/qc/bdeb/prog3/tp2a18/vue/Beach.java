@@ -16,12 +16,14 @@ import org.newdawn.slick.SpriteSheet;
  *
  * @author 1721244
  */
-public class Beach extends Entite {
+public class Beach extends Entite implements  Collisionnable{
 
     private int deltaX = 1;
     private int deltaY = 1;
     private ArrayList<Image> listeAnimation = new ArrayList();
     private int animation1 = 0, animation2 = 0;
+    private int pointVie=3;
+    private boolean possedeArme=true;
 
     public Beach(float x, float y, SpriteSheet spriteSheet) {
         super(x, y, spriteSheet, 0, 3);
@@ -105,5 +107,23 @@ public class Beach extends Entite {
     public float getY() {
         return super.getY(); //To change body of generated methods, choose Tools | Templates.
     }
+
+    public int getPointVie() {
+        return pointVie;
+    }
+
+    public boolean isPossedeArme() {
+        return possedeArme;
+    }
+
+    public void setPossedeArme(boolean possedeArme) {
+        this.possedeArme = possedeArme;
+    }
+
+ 
+
+   
+    
+    
 
 }

@@ -54,6 +54,9 @@ public class Jeu extends BasicGame implements Observer {
     private long millis3;
     private EnnemiVolant3 ennemiVolant3;
     private EnnemiVolant2 ennemiVolant2;
+    private Potion potion;
+    private Arme arme;
+    private Bombe bombe;
 
     /**
      * Contructeur de Jeu
@@ -79,7 +82,7 @@ public class Jeu extends BasicGame implements Observer {
     public void init(GameContainer container) throws SlickException {
         millis = System.currentTimeMillis();
         millis2 = System.currentTimeMillis();
-        millis3 = System.currentTimeMillis();
+
         points2 = Integer.parseInt(points1);
         input = container.getInput();
         r = new Random();
@@ -201,10 +204,11 @@ public class Jeu extends BasicGame implements Observer {
 
         if (listeKeys.contains(KeyCode.SPACE) && System.currentTimeMillis() >= millis2 + 500) {
 
-            if (beach.isPossedeArme() ) {
+            if (beach.isPossedeArme()) {
                 tirerAvecArme();
-                
+
             } else {
+
                 tirerBalle();
             }
 
@@ -213,32 +217,61 @@ public class Jeu extends BasicGame implements Observer {
     }
 
     private void gererCollisions() {
-//        ArrayList<Bougeable> listeTempBougeable = new ArrayList<>();
-//
-//        for (Bougeable b1 : listeBougeable) {
-//            for (Bougeable b2 : listeBougeable) {
-//                if (b1 != b2) {
-//                    if (b1 instanceof Collisionnable && b2 instanceof Collisionnable) {
-//
-//                        if (b1.getRectangle().intersects(b2.getRectangle())) {
-//
-//                            if ((b1.getClass() = Projectile.class && b2.getClass() = BouleDeFeu.class) || (b1.getClass() = Beach.class && b2.getClass() = BouleDeFeu.class) || (b1.getClass() = Beach.class && b2.getClass() = Ennemi.class)) {
-//
-//                                listeTempBougeable.add(b1);
-//                                listeTempBougeable.add(b2);
-//
-//                            }
-//
-//                        }
-//
-//                    }
-//
-//                }
-//
-//            }
-//        }
-//        listeBougeable.removeAll(listeTempBougeable);
-//        listeTempBougeable.clear();
+        ArrayList<Bougeable> listeTempBougeable = new ArrayList<>();
+        //gestion de la récuperation des bonus
+        for (Entite b1 : listeEntite) {
+            if (b1 instanceof Bonus && b1.getRectangle().intersects(beach.getRectangle())) {
+                controleur.ajouterPoint(25);
+                if (b1.getClass() == Potion.class) {
+                    if (modele.getPointVie() < 3) {
+                        //je sais pas si j'ai droit d'aller chercher modele
+                        controleur.ajouterPoint(1);
+                    }
+                } else if (b1.getClass() == Arme.class) {
+                    beach.setPossedeArme(true);
+
+                } else if (b1.getClass() == Bombe.class) {
+                    beach.setPossedeBombe(true);
+                }
+            }
+        }
+
+        for (Bougeable b1 : listeBougeable) {
+            if ((b1 instanceof Méchant || b1.getClass() == BouleDeFeu.class) && (b1.getRectangle().intersects(beach.getRectangle()))) {
+                listeTempBougeable.add(b1);
+                listeEntite.remove((Entite) b1);
+                controleur.modifierPointVie(-1);
+
+            }
+              Entite b3;
+            for (Bougeable b2 : listeBougeable) {
+                if (b1 != b2) {
+                    if (b1 instanceof Collisionnable && b2 instanceof Collisionnable) {
+
+                        if (b1.getRectangle().intersects(b2.getRectangle())) {
+
+                            if ((b1.getClass() == Projectile.class || b2.getClass() == Projectile.class) && (b1 instanceof Méchant || b1 instanceof Méchant)) {
+                                listeTempBougeable.add(b1);
+                                listeTempBougeable.add(b2);
+                                listeEntite.remove((Entite) b1);
+                                listeEntite.remove((Entite) b2);
+                                controleur.ajouterPoint(5);
+
+                                 b3 = (Entite) b1;
+                                creerBonus(b3.getX(), b3.getY());
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        }
+        listeBougeable.removeAll(listeTempBougeable);
+        listeTempBougeable.clear();
 
     }
 
@@ -428,6 +461,27 @@ public class Jeu extends BasicGame implements Observer {
 
     public Beach getBeach() {
         return beach;
+    }
+
+    private void creerBonus(float posX, float posY) {
+        int nb = r.nextInt(3);
+        int quelBonus = r.nextInt(4);
+        if (nb == 1) {
+            if (quelBonus == 1) {
+                bombe = new Bombe(posX, posY, spriteDivers);
+                listeEntite.add(bombe);
+//                listeBougeable.add(bombe);
+            } else if (quelBonus == 2) {
+                potion = new Potion(posX, posY, spriteDivers);
+                listeEntite.add(potion);
+//                listeBougeable.add(potion);
+            } else if (quelBonus == 3) {
+                arme = new Arme(posX, posY, spriteDivers);
+                listeEntite.add(arme);
+//                listeBougeable.add(arme);
+            }
+        }
+
     }
 
 }

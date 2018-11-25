@@ -28,4 +28,14 @@ public class Projectile extends Entite implements Bougeable, Collisionnable {
 
     }
 
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+    
+    
+
 }

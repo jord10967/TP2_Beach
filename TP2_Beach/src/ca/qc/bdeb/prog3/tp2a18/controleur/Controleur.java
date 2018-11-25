@@ -33,5 +33,12 @@ public class Controleur {
         }
     }
 
+    public void ajouterPoint(int point) {
+        modele.augmenterScore(point);
+    }
+    public void modifierPointVie(int point){
+        modele.modifierPointVie(point);
+    }
+
 }
 

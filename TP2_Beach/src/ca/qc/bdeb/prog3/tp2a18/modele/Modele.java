@@ -12,5 +12,31 @@ import java.util.Observable;
  * @author MGrenon
  */
 public class Modele extends Observable {
-    
+
+    private int pointVie;
+    private int score;
+
+    public void modifierPointVie(int point) {
+        pointVie = pointVie + point;
+        majObserver();
+    }
+
+    public void augmenterScore(int point) {
+        score = score + point;
+        majObserver();
+    }
+
+    private void majObserver() {
+        setChanged();
+        notifyObservers();
+    }
+
+    public int getPointVie() {
+        return pointVie;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
 }

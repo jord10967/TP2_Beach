@@ -5,16 +5,10 @@
  */
 package ca.qc.bdeb.prog3.tp2a18.vue;
 
-import org.newdawn.slick.geom.Rectangle;
-
 /**
  *
- * @author MGrenon
+ * @author 1721244
  */
-public interface Bougeable {
-    
-    public void bouger();
-    public Rectangle getRectangle();
-    
+public interface Bonus {
+     
 }
-

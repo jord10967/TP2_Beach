@@ -11,12 +11,12 @@ import org.newdawn.slick.SpriteSheet;
  *
  * @author 1721244
  */
-public class Potion extends Entite implements Bonus, Bougeable {
+public class BonusVie extends Entite implements Bonus, Bougeable {
 
     private float deltaX = 0.5f;
 
-    public Potion(float x, float y, SpriteSheet spriteSheet) {
-        super(x, y, spriteSheet, 4, 3);
+    public BonusVie(float x, float y, SpriteSheet spriteSheet) {
+        super(x, y, spriteSheet, 1, 0);
     }
 
     @Override

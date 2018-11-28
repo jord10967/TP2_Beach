@@ -11,12 +11,12 @@ import org.newdawn.slick.SpriteSheet;
  *
  * @author 1721244
  */
-public class Arme extends Entite implements Bonus, Bougeable {
+public class BonusArme extends Entite implements Bonus, Bougeable {
 
     private float deltaX = 0.5f;
 
-    public Arme(float x, float y, SpriteSheet spriteSheet) {
-        super(x, y, spriteSheet, 1, 1);
+    public BonusArme(float x, float y, SpriteSheet spriteSheet) {
+        super(x, y, spriteSheet, 4, 3);
     }
 
     @Override

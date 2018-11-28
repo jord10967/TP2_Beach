@@ -13,11 +13,14 @@ import java.util.Observable;
  */
 public class Modele extends Observable {
 
-    private int pointVie;
+    private int pointVie=3;
     private int score;
-
+    private int pointVieMax=3;
     public void modifierPointVie(int point) {
-        pointVie = pointVie + point;
+       if(pointVie<=pointVieMax && pointVie>0)
+            pointVie = pointVie + point;
+        
+        
         majObserver();
     }
 

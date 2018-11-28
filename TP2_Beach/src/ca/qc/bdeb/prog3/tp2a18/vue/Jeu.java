@@ -10,6 +10,7 @@ import static ca.qc.bdeb.prog3.tp2a18.controleur.Controleur.HAUTEUR;
 import static ca.qc.bdeb.prog3.tp2a18.controleur.Controleur.LARGEUR;
 import ca.qc.bdeb.prog3.tp2a18.modele.Modele;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
@@ -34,29 +35,22 @@ public class Jeu extends BasicGame implements Observer {
     private ArrayList<Entite> listeEntite = new ArrayList<>(); // Toutes les entités
     private ArrayList<KeyCode> listeKeys = new ArrayList<>(); // Les touches enfoncées
     private Input input; // L’entrée (souris/touches de clavier, etc.)
-    private Ciel ciel;
+
     private SpriteSheet spriteMonde, spritePrincesse, spriteDivers;
-    private Plancher plancher1, plancher2;
+
     private Beach beach;
-    private FeuilleArbre feuilleArbre;
-    private TroncArbre troncArbre;
+
     private Random r;
-    private Projectile balle;
+
     private String points1 = "0";
     private int points2;
-    private Coeur coeur;
-    private EnnemiTerre enemiTerre;
-    private BouleDeFeu bouleDeFeu;
-    private EnnemiVolant1 ennemiVolant1;
+
     private int typeVague;
     private long millis;
     private long millis2;
     private long millis3;
-    private EnnemiVolant3 ennemiVolant3;
-    private EnnemiVolant2 ennemiVolant2;
-    private Potion potion;
-    private Arme arme;
-    private Bombe bombe;
+
+    private boolean tempsTirer;
 
     /**
      * Contructeur de Jeu
@@ -80,10 +74,11 @@ public class Jeu extends BasicGame implements Observer {
      * @throws SlickException si le jeu plante
      */
     public void init(GameContainer container) throws SlickException {
+        tempsTirer = false;
+
         millis = System.currentTimeMillis();
         millis2 = System.currentTimeMillis();
 
-        points2 = Integer.parseInt(points1);
         input = container.getInput();
         r = new Random();
         spriteMonde = new SpriteSheet("images/sprites_monde.png", 32, 32);
@@ -95,7 +90,7 @@ public class Jeu extends BasicGame implements Observer {
         beach = new Beach(10, HAUTEUR - 128, spritePrincesse);
         listeEntite.add(beach);
         for (int i = 1; i < 4; i++) {
-            coeur = new Coeur(i * 32, i);
+            Coeur coeur = new Coeur(i * 32, i);
             listeEntite.add(coeur);
         }
 
@@ -110,6 +105,7 @@ public class Jeu extends BasicGame implements Observer {
      */
     public void update(GameContainer container, int delta) throws SlickException {
         typeVague = r.nextInt(3);
+        points1 = "" + points2;
         bouger();
         creerBouleDeFeu();
         gestionEnnemiTerre();
@@ -118,7 +114,7 @@ public class Jeu extends BasicGame implements Observer {
             millis = System.currentTimeMillis();
             int cpt = 0;
             for (int i = 0; i < 4; i++) {
-                System.out.println("a");
+
                 vaguesEnnemi(typeVague, cpt);
                 cpt++;
             }
@@ -128,6 +124,8 @@ public class Jeu extends BasicGame implements Observer {
         gestionArbres();
         delete();
         gererCollisions();
+        gererNuke();
+
         getKeys();
         traiterKeys();
 
@@ -144,7 +142,8 @@ public class Jeu extends BasicGame implements Observer {
         for (Entite entite : listeEntite) {
             g.drawImage(entite.getImage(), entite.getX(), entite.getY());
         }
-        g.drawString(points1, LARGEUR - 30, 10);
+        g.drawString(points1, LARGEUR - 50, 10);
+
     }
 
     /**
@@ -155,6 +154,24 @@ public class Jeu extends BasicGame implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
+        ArrayList<Entite> listTemp = new ArrayList<>();
+
+        int nbVie = modele.getPointVie();
+        System.out.println(nbVie);
+        for (Entite entite : listeEntite) {
+            if (entite instanceof Coeur) {
+                listTemp.add(entite);
+            }
+        }
+        listeEntite.removeAll(listTemp);
+        listTemp.clear();
+
+        for (int i = 0; i < nbVie; i++) {
+            Coeur coeur = new Coeur(i * 32, i);
+            listeEntite.add(coeur);
+
+        }
+        points2 = modele.getScore();
 
     }
 
@@ -200,12 +217,17 @@ public class Jeu extends BasicGame implements Observer {
     }
 
     private void traiterKeys() {
+
         beach.bouger(listeKeys);
 
         if (listeKeys.contains(KeyCode.SPACE) && System.currentTimeMillis() >= millis2 + 500) {
 
-            if (beach.isPossedeArme()) {
+            if (beach.isPossedeArme() && tempsTirer) {
                 tirerAvecArme();
+
+                if (System.currentTimeMillis() >= millis3 + 10000) {
+                    tempsTirer = false;
+                }
 
             } else {
 
@@ -217,48 +239,55 @@ public class Jeu extends BasicGame implements Observer {
     }
 
     private void gererCollisions() {
-        ArrayList<Bougeable> listeTempBougeable = new ArrayList<>();
+        float posX = 0, posY = 0;
+        boolean bonus = false;
+        ArrayList<Entite> listeTempBougeable = new ArrayList<>();
+
         //gestion de la récuperation des bonus
         for (Entite b1 : listeEntite) {
             if (b1 instanceof Bonus && b1.getRectangle().intersects(beach.getRectangle())) {
                 controleur.ajouterPoint(25);
-                if (b1.getClass() == Potion.class) {
-                    if (modele.getPointVie() < 3) {
-                        //je sais pas si j'ai droit d'aller chercher modele
-                        controleur.ajouterPoint(1);
-                    }
-                } else if (b1.getClass() == Arme.class) {
-                    beach.setPossedeArme(true);
+                listeTempBougeable.add(b1);
+                if (b1 instanceof BonusVie) {
 
-                } else if (b1.getClass() == Bombe.class) {
+                    controleur.modifierPointVie(1);
+
+                } else if (b1 instanceof BonusArme) {
+                    beach.setPossedeArme(true);
+                    tempsTirer = true;
+                    millis3 = System.currentTimeMillis();
+
+                } else if (b1 instanceof BonusBombe) {
                     beach.setPossedeBombe(true);
                 }
             }
         }
 
         for (Bougeable b1 : listeBougeable) {
-            if ((b1 instanceof Méchant || b1.getClass() == BouleDeFeu.class) && (b1.getRectangle().intersects(beach.getRectangle()))) {
-                listeTempBougeable.add(b1);
-                listeEntite.remove((Entite) b1);
+            if ((b1 instanceof Méchant || b1 instanceof BouleDeFeu) && (b1.getRectangle().intersects(beach.getRectangle()))) {
+                listeTempBougeable.add((Entite) b1);
+
                 controleur.modifierPointVie(-1);
 
             }
-              Entite b3;
+
             for (Bougeable b2 : listeBougeable) {
                 if (b1 != b2) {
                     if (b1 instanceof Collisionnable && b2 instanceof Collisionnable) {
 
                         if (b1.getRectangle().intersects(b2.getRectangle())) {
 
-                            if ((b1.getClass() == Projectile.class || b2.getClass() == Projectile.class) && (b1 instanceof Méchant || b1 instanceof Méchant)) {
-                                listeTempBougeable.add(b1);
-                                listeTempBougeable.add(b2);
-                                listeEntite.remove((Entite) b1);
-                                listeEntite.remove((Entite) b2);
-                                controleur.ajouterPoint(5);
+                            if ((b1 instanceof Projectile || b2 instanceof Projectile) && (b1 instanceof Méchant || b2 instanceof Méchant)) {
+                                listeTempBougeable.add((Entite) b1);
+                                listeTempBougeable.add((Entite) b2);
+                                if (b1 instanceof Projectile && b2 instanceof Méchant) {
+                                    controleur.ajouterPoint(5);
+                                }
 
-                                 b3 = (Entite) b1;
-                                creerBonus(b3.getX(), b3.getY());
+                                Entite b3 = (Entite) b1;
+                                posX = b3.getX();
+                                posY = b3.getY();
+                                bonus = true;
 
                             }
 
@@ -270,19 +299,24 @@ public class Jeu extends BasicGame implements Observer {
 
             }
         }
+        if (bonus) {
+            creerBonus(posX, posY);
+        }
         listeBougeable.removeAll(listeTempBougeable);
+        listeEntite.removeAll(listeTempBougeable);
         listeTempBougeable.clear();
 
     }
 
     private void tirerBalle() {
-        balle = new Projectile(beach.getX() + 32, beach.getY() + 24, 0);
+        Projectile balle = new Projectile(beach.getX() + 32, beach.getY() + 24, 0);
         listeEntite.add(balle);
         listeBougeable.add(balle);
 
     }
 
     private void tirerAvecArme() {
+        Projectile balle = null;
         for (int i = 0; i < 3; i++) {
             switch (i) {
                 case 0:
@@ -312,9 +346,9 @@ public class Jeu extends BasicGame implements Observer {
         while (nombreHauteur < 2) {
             nombreHauteur = r.nextInt(13);
         }
-        feuilleArbre = new FeuilleArbre(position, HAUTEUR - 64 - 32 * nombreHauteur, spriteMonde);
+        FeuilleArbre feuilleArbre = new FeuilleArbre(position, HAUTEUR - 64 - 32 * nombreHauteur, spriteMonde);
         for (float i = HAUTEUR - 32 - 32 * nombreHauteur; i < HAUTEUR - 64; i = i + 32) {
-            troncArbre = new TroncArbre(position, i, spriteMonde);
+            TroncArbre troncArbre = new TroncArbre(position, i, spriteMonde);
             listeEntite.add(troncArbre);
             listeBougeable.add(troncArbre);
         }
@@ -329,7 +363,7 @@ public class Jeu extends BasicGame implements Observer {
 
         for (int i = 0; i < listeBougeable.size(); i++) {
 
-            if (listeBougeable.get(i).getRectangle().getX() < -32 && listeBougeable.get(i).getClass() != Plancher.class) {
+            if (listeBougeable.get(i).getRectangle().getX() < -32 && !(listeBougeable.get(i) instanceof Plancher) || (listeBougeable.get(i) instanceof Projectile && listeBougeable.get(i).getRectangle().getX() > LARGEUR)) {
                 listeTemp.add((Entite) listeBougeable.get(i));
             }
 
@@ -349,7 +383,7 @@ public class Jeu extends BasicGame implements Observer {
     private void background() {
         for (int i = 0; i <= HAUTEUR - 64; i = i + 32) {
             for (int j = 0; j <= LARGEUR; j = j + 32) {
-                ciel = new Ciel(j, i, spriteMonde);
+                Ciel ciel = new Ciel(j, i, spriteMonde);
                 listeEntite.add(ciel);
             }
 
@@ -360,8 +394,8 @@ public class Jeu extends BasicGame implements Observer {
         }
         for (int i = 0; i < LARGEUR + 32; i = i + 32) {
 
-            plancher1 = new Plancher(i, HAUTEUR - 64, spriteMonde, 3, 1);
-            plancher2 = new Plancher(i, HAUTEUR - 32, spriteMonde, 4, 1);
+            Plancher plancher1 = new Plancher(i, HAUTEUR - 64, spriteMonde, 3, 1);
+            Plancher plancher2 = new Plancher(i, HAUTEUR - 32, spriteMonde, 4, 1);
 
             listeEntite.add(plancher1);
             listeEntite.add(plancher2);
@@ -377,7 +411,7 @@ public class Jeu extends BasicGame implements Observer {
             position = r.nextInt(2 * LARGEUR);
 
         }
-        enemiTerre = new EnnemiTerre(position, HAUTEUR - 96, spriteDivers);
+        EnnemiTerre enemiTerre = new EnnemiTerre(position, HAUTEUR - 96, spriteDivers);
 
         listeEntite.add(enemiTerre);
         listeBougeable.add(enemiTerre);
@@ -394,7 +428,7 @@ public class Jeu extends BasicGame implements Observer {
             if (listeBougeable.get(i) instanceof EnnemiTerre) {
                 EnnemiTerre ennemi = (EnnemiTerre) listeBougeable.get(i);
                 if (ennemi.getAnimation() == 800) {
-                    bouleDeFeu = new BouleDeFeu(ennemi.getX(), ennemi.getY() - 32, spriteDivers);
+                    BouleDeFeu bouleDeFeu = new BouleDeFeu(ennemi.getX(), ennemi.getY() - 32, spriteDivers);
                     listeBougeable.add(bouleDeFeu);
                     listeEntite.add(bouleDeFeu);
                 }
@@ -416,7 +450,7 @@ public class Jeu extends BasicGame implements Observer {
                 } else if (cpt == 3) {
                     intervalle += 120;
                 }
-                ennemiVolant1 = new EnnemiVolant1(intervalle, HAUTEUR - 850, spriteDivers);
+                EnnemiVolant1 ennemiVolant1 = new EnnemiVolant1(intervalle, HAUTEUR - 850, spriteDivers);
                 listeBougeable.add(ennemiVolant1);
                 listeEntite.add(ennemiVolant1);
 
@@ -430,7 +464,7 @@ public class Jeu extends BasicGame implements Observer {
                 } else if (cpt == 3) {
                     intervalle += 60;
                 }
-                ennemiVolant2 = new EnnemiVolant2(intervalle, HAUTEUR - 850, spriteDivers);
+                EnnemiVolant2 ennemiVolant2 = new EnnemiVolant2(intervalle, HAUTEUR - 850, spriteDivers);
                 listeBougeable.add(ennemiVolant2);
                 listeEntite.add(ennemiVolant2);
 
@@ -444,7 +478,7 @@ public class Jeu extends BasicGame implements Observer {
                 } else if (cpt == 3) {
                     intervalle += 120;
                 }
-                ennemiVolant3 = new EnnemiVolant3(intervalle, HAUTEUR - 850, spriteDivers);
+                EnnemiVolant3 ennemiVolant3 = new EnnemiVolant3(intervalle, HAUTEUR - 850, spriteDivers);
                 listeBougeable.add(ennemiVolant3);
                 listeEntite.add(ennemiVolant3);
                 break;
@@ -464,24 +498,40 @@ public class Jeu extends BasicGame implements Observer {
     }
 
     private void creerBonus(float posX, float posY) {
-        int nb = r.nextInt(3);
-        int quelBonus = r.nextInt(4);
+
+        int nb = r.nextInt(10);
+        int quelBonus = r.nextInt(3);
         if (nb == 1) {
-            if (quelBonus == 1) {
-                bombe = new Bombe(posX, posY, spriteDivers);
+            if (quelBonus == 0) {
+                BonusBombe bombe = new BonusBombe(posX, posY, spriteDivers);
                 listeEntite.add(bombe);
-//                listeBougeable.add(bombe);
+                listeBougeable.add(bombe);
+            } else if (quelBonus == 1) {
+                BonusVie vie = new BonusVie(posX, posY, spriteDivers);
+                listeEntite.add(vie);
+                listeBougeable.add(vie);
             } else if (quelBonus == 2) {
-                potion = new Potion(posX, posY, spriteDivers);
-                listeEntite.add(potion);
-//                listeBougeable.add(potion);
-            } else if (quelBonus == 3) {
-                arme = new Arme(posX, posY, spriteDivers);
+                BonusArme arme = new BonusArme(posX, posY, spriteDivers);
                 listeEntite.add(arme);
-//                listeBougeable.add(arme);
+                listeBougeable.add(arme);
             }
         }
 
+    }
+
+    private void gererNuke() {
+        ArrayList<Entite> listeTemp = new ArrayList<>();
+        if (beach.isPossedeBombe()) {
+            for (Bougeable b : listeBougeable) {
+                if (b.getRectangle().getX() < LARGEUR && !(b instanceof Plancher) && !(b instanceof TroncArbre) && !(b instanceof FeuilleArbre)) {
+                    listeTemp.add((Entite) b);
+                }
+            }
+            listeBougeable.removeAll(listeTemp);
+            listeEntite.removeAll(listeTemp);
+            listeTemp.clear();
+            beach.setPossedeBombe(false);
+        }
     }
 
 }
